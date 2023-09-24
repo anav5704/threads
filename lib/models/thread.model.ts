@@ -4,7 +4,7 @@ const threadSchema = new Schema({
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     community: { type: Schema.Types.ObjectId, ref: "Community" },
     text: { type: String, required: true, },
-    parentIt: { type: String },
+    parentI: { type: String },
     createdAt: { type: Date, default: Date.now },
     children: [{ type: Schema.Types.ObjectId, ref: "Thread" }],
 })

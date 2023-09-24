@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { start } from "../mongoose"
 import User from "../models/user.model"
 import { FilterQuery, SortOrder, _FilterQuery } from "mongoose"
+import Thread from "../models/thread.model"
 // import mongoose from "mongoose"
 // const User = mongoose.model("User")
 
@@ -74,5 +75,23 @@ export async function fetchUsers({ userId, query = "",pageNumber = 1, pageSize =
 
     } catch (error: any) {
         throw new Error(`Failed to fetch all users: ${error.message}`)
+    }
+}
+
+export async function getActivity(userId: string){
+    try {
+        start()
+        const userThreads = await Thread.find({author: userId})
+        const childThreadIds = userThreads.reduce((acc, userThread) => {
+            return acc.concat(userThread.children)
+        }, [])
+
+        const replies = await Thread.find({_id: {$in:childThreadIds}, author: {$ne: userId}})
+        .populate({ path: "author",  model: User, select: "name image _id"})
+
+        return replies
+
+    } catch (error: any) {
+        throw new Error(`Failed to fetch activities: ${error.message}`)
     }
 }
