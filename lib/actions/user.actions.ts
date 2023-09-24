@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { start } from "../mongoose"
 import User from "../models/user.model"
+import { FilterQuery, SortOrder, _FilterQuery } from "mongoose"
 // import mongoose from "mongoose"
 // const User = mongoose.model("User")
 
@@ -40,5 +41,38 @@ export async function fetchUser(id: string){
         return await User.findOne({id})
     } catch (error: any) {
         throw new Error(`Failed to fetch user: ${error.message}`)
+    }
+}
+
+interface PropsTwo {
+    userId: string, 
+    query?: string, 
+    pageNumber?: number, 
+    pageSize?: number, 
+    sortBy?: SortOrder, 
+}
+
+export async function fetchUsers({ userId, query = "",pageNumber = 1, pageSize = 20, sortBy = "desc"}: PropsTwo){
+    const skipAmount = (pageNumber - 1) * pageSize
+
+    try {
+        start()
+        const regex = new RegExp(query, "i")
+        const allUsers: FilterQuery<typeof User> = {id: {$ne: userId}}
+
+        if(query.trim() !== ""){
+            allUsers.$or = [{username: {$regex: regex}}, {name: {$regex: regex}}]
+        }
+
+        const sortOptions = { createdAt: sortBy}
+        const userQuery = User.find(allUsers).sort(sortOptions).skip(skipAmount).limit(pageSize)
+        const totalUserCount = await User.countDocuments(allUsers)
+        const users = await userQuery.exec()
+        const isNext = totalUserCount > skipAmount + users.length
+
+        return { users, isNext }
+
+    } catch (error: any) {
+        throw new Error(`Failed to fetch all users: ${error.message}`)
     }
 }

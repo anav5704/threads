@@ -51,8 +51,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
 }
 
 export async function fetchThreadById(id: string){
-    start()
     try {
+        start()
         const thread =  await Thread.findById(id)
         .populate({path: "author", model: User, select: "_id id name image"}) 
         .populate({path: "children", 
@@ -75,8 +75,8 @@ export async function fetchThreadById(id: string){
 }   
 
 export async function addCommentToThread(threadId: string, commentText: string, userId: string, path: string){
-    start()
     try {
+        start()
         const originalThread = await Thread.findById(threadId)
         if(!originalThread){
             throw new Error("Thread not found")
@@ -100,8 +100,8 @@ export async function addCommentToThread(threadId: string, commentText: string, 
 }
 
 export async function fetchUserPosts(userId: string){
-    start()
     try {
+        start()
         const threads = await User.findOne({id: userId})
         .populate({
             // populate commmunity
