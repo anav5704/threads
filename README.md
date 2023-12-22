@@ -1,1 +1,1 @@
-> You can not learn without making mistakes.
+> You can not learn without making mistakes
